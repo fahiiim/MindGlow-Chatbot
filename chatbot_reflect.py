@@ -6,7 +6,6 @@ Pure non-directive questioning. No advice. Ever.
 from openai import OpenAI
 from config import get_settings, REFLECT_SYSTEM_PROMPT, CRISIS_RESOURCES
 from filters import detect_language, check_for_directives, detect_crisis
-from memory import get_embedding
 
 
 class ReflectBot:

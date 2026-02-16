@@ -3,9 +3,7 @@ MindGlow Filters — Response directive filter + Crisis detection.
 """
 
 import re
-from datetime import datetime, timezone
 from langdetect import detect, LangDetectException
-from models import FilterLogEntry, CrisisLogEntry, ChatbotType
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -74,24 +72,6 @@ def check_for_directives(response_text: str) -> list[str]:
     return found
 
 
-def create_filter_log(
-    chatbot: ChatbotType,
-    user_id: str,
-    original_response: str,
-    reasons: list[str],
-    regenerated_response: str,
-) -> FilterLogEntry:
-    """Create a filter log entry for the backend to store."""
-    return FilterLogEntry(
-        timestamp=datetime.now(timezone.utc),
-        chatbot=chatbot,
-        user_id=user_id,
-        original_response=original_response,
-        filtered_reason=f"Directive phrases detected: {', '.join(reasons)}",
-        regenerated_response=regenerated_response,
-    )
-
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Crisis Detection
 # ─────────────────────────────────────────────────────────────────────────────
@@ -135,18 +115,3 @@ def detect_crisis(text: str) -> list[str]:
             indicators.append(match.group())
     return indicators
 
-
-def create_crisis_log(
-    user_id: str,
-    user_message: str,
-    indicators: list[str],
-    language: str,
-) -> CrisisLogEntry:
-    """Create a crisis log entry for the safety team — backend stores this."""
-    return CrisisLogEntry(
-        timestamp=datetime.now(timezone.utc),
-        user_id=user_id,
-        user_message=user_message,
-        detected_indicators=indicators,
-        language=language,
-    )
