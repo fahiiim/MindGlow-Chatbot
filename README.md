@@ -11,8 +11,30 @@ Two AI chatbots for self-reflection. No advice. No judgments. Just space to thin
 
 ## Quick Start
 
+### 1. Set up virtual environment (recommended)
 ```bash
+# Create virtual environment
+python -m venv .venv
+
+# Activate it
+# On Windows:
+.\.venv\Scripts\Activate.ps1
+# On macOS/Linux:
+source .venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
+```
+
+### 2. Configure environment
+```bash
+# Copy example config and add your OpenAI API key
+cp .env.example .env
+# Edit .env and add your OPENAI_API_KEY
+```
+
+### 3. Run the server
+```bash
 uvicorn main:app --reload
 ```
 
