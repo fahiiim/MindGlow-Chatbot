@@ -1,13 +1,18 @@
 # MindGlow AI — Self-Reflection Chatbot System
 
-Two AI chatbots for self-reflection. No advice. No judgments. Just space to think.
+Two completely separate AI chatbots for self-reflection. No advice. No judgments. Just space to think.
 
-## Chatbots
+## The Two Chatbots
 
-| Chatbot | Purpose | Method |
-|---------|---------|--------|
-| **Reflect** (Inner Voice) | Emotional exploration | Non-directive, open-ended questions, warm presence |
-| **Inner Learning** | Knowledge discovery | Socratic method, questions-only, user forms own understanding |
+### 🌟 Reflect — Your Inner Voice
+**Purpose:** Non-directive emotional exploration  
+**Method:** Open-ended questions only, warm presence, never gives advice  
+**Use for:** Processing feelings, self-reflection, emotional clarity
+
+### 🧠 Inner Learning — Socratic Discovery Guide  
+**Purpose:** Knowledge discovery through questioning  
+**Method:** Pure Socratic method, guides you to form your own understanding  
+**Use for:** Learning concepts, exploring ideas, developing insights
 
 ## Quick Start
 
@@ -33,12 +38,18 @@ cp .env.example .env
 # Edit .env and add your OPENAI_API_KEY
 ```
 
-### 3. Run the server
+### 3. Test the chatbots
 ```bash
-uvicorn main:app --reload
+# Interactive terminal interface
+python test_bots.py
 ```
 
-API docs: **http://localhost:8000/docs**
+Choose from the menu:
+- Test **Reflect** bot interactively
+- Test **Inner Learning** bot interactively  
+- Run automated quick tests
+- Type `reset` to clear conversation history
+- Type `quit` to return to menu
 
 ## API Endpoints
 
@@ -138,12 +149,24 @@ This system is **stateless** — it does NOT store data. Your backend handles al
 - **Semantic Memory** — Embedding-based retrieval of relevant past conversations
 - **Neutral Summaries** — No progress tracking, just themes explored
 
-## Files
+## Project Structure
 ```
-config.py    — Settings, system prompts, crisis resources
-models.py    — Pydantic schemas (request/response models)
-memory.py    — Embeddings & semantic search
-filters.py   — Response filter & crisis detection
-chatbots.py  — Core chatbot engines
-main.py      — FastAPI application
+config.py              — Settings, system prompts, crisis resources
+chatbot_reflect.py     — Reflect chatbot class (emotional exploration)
+chatbot_learning.py    — Inner Learning chatbot class (Socratic method)
+filters.py             — Response filter & crisis detection
+memory.py              — Embeddings & semantic search (for future use)
+models.py              — Pydantic models (for API integration later)
+test_bots.py           — Terminal interface for testing both bots
+main.py                — FastAPI application (coming soon)
 ```
+
+## Next Steps
+
+- [x] Two separate chatbot implementations
+- [x] Terminal testing interface
+- [x] Response filtering and crisis detection
+- [ ] FastAPI integration (for production use)
+- [ ] Semantic memory with embeddings
+- [ ] Session summaries and continuity
+- [ ] Database integration guide
