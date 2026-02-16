@@ -14,6 +14,8 @@ Two completely separate AI chatbots for self-reflection. No advice. No judgments
 **Method:** Pure Socratic method, guides you to form your own understanding  
 **Use for:** Learning concepts, exploring ideas, developing insights
 
+---
+
 ## Quick Start
 
 ### 1. Set up virtual environment (recommended)
@@ -22,151 +24,209 @@ Two completely separate AI chatbots for self-reflection. No advice. No judgments
 python -m venv .venv
 
 # Activate it
-# On Windows:
+# Windows:
 .\.venv\Scripts\Activate.ps1
-# On macOS/Linux:
+# macOS/Linux:
 source .venv/bin/activate
+```
 
-# Install dependencies
+### 2. Install dependencies
+```bash
 pip install -r requirements.txt
 ```
 
-### 2. Configure environment
+### 3. Configure your OpenAI API key
 ```bash
-# Copy example config and add your OpenAI API key
+# Copy the example config
 cp .env.example .env
-# Edit .env and add your OPENAI_API_KEY
+
+# Edit .env and add your OpenAI API key
+# OPENAI_API_KEY=your_key_here
 ```
 
-### 3. Test the chatbots
+### 4. Test the chatbots
 ```bash
 # Interactive terminal interface
 python test_bots.py
 ```
 
-Choose from the menu:
-- Test **Reflect** bot interactively
-- Test **Inner Learning** bot interactively  
-- Run automated quick tests
+Or run the automated demo:
+```bash
+python demo.py
+```
+
+---
+
+## Using the Chatbots
+
+### Interactive Terminal Interface
+
+Run `python test_bots.py` and choose from the menu:
+- **1** — Test Reflect bot (emotional exploration)
+- **2** — Test Inner Learning bot (knowledge discovery)
+- **3** — Run automated quick tests
+- **4** — Exit
+
+**Commands during chat:**
+- Type your message normally to chat
 - Type `reset` to clear conversation history
-- Type `quit` to return to menu
+- Type `quit` to return to main menu
 
-## API Endpoints
+### Using in Your Code
 
-### `POST /chat` — Main Chat
-Send a message to either chatbot. Backend provides user info and history from DB.
+```python
+from chatbot_reflect import ReflectBot
+from chatbot_learning import InnerLearningBot
 
-```json
+# Create instances
+reflect = ReflectBot()
+learning = InnerLearningBot()
+
+# Chat with Reflect
+response = reflect.chat("I feel overwhelmed today")
+print(response['reply'])          # The bot's response
+print(response['language'])       # Detected language (en, ar, etc.)
+print(response['crisis_detected']) # True if crisis indicators found
+
+# Chat with Inner Learning  
+response = learning.chat("How does machine learning work?")
+print(response['reply'])          # Socratic question to guide discovery
+print(response['was_filtered'])   # True if teaching phrases were caught
+
+# Reset conversation history
+reflect.reset()
+learning.reset()
+```
+
+### Response Format
+
+Both chatbots return a dictionary:
+```python
 {
-  "chatbot": "reflect",
-  "user_info": { "user_id": "user_123", "display_name": "Sarah" },
-  "message": "I've been feeling overwhelmed lately",
-  "conversation_history": {
-    "messages": [
-      { "role": "user", "content": "Hi", "timestamp": "2026-02-17T10:00:00Z" },
-      { "role": "assistant", "content": "Hello, I'm here with you." }
-    ]
-  },
-  "past_summaries": ["User explored feelings of uncertainty about career changes."]
+    "reply": "The chatbot's response...",
+    "language": "en",               # ISO 639-1 language code
+    "was_filtered": False,          # True if directive phrases detected
+    "filter_reason": None,          # Details if filtered
+    "crisis_detected": False,       # True if crisis detected (Reflect only)
+    "crisis_resources": None,       # Crisis helpline info (if detected)
+    "crisis_indicators": []         # Matched crisis phrases (if any)
 }
 ```
 
-**Response includes:**
-- `reply` — Bot response
-- `detected_language` — Language code (en, ar, etc.)
-- `crisis_detected` / `crisis_resources` — If self-harm indicators found
-- `response_was_filtered` / `filter_log` — If directive phrases caught
-- `embedding` / `reply_embedding` — Vectors for semantic search (store in DB)
-- `summary` — Neutral exchange summary (store in DB)
+---
 
-### `POST /chat-with-memory` — Chat + Auto Memory Retrieval
-Same as `/chat` but also accepts stored messages with embeddings. Automatically finds relevant past context.
+## Core Features
 
-### `POST /semantic-search` — Find Relevant Past Messages
-```json
-{
-  "query": "feeling overwhelmed at work",
-  "stored_messages": [
-    { "role": "user", "content": "work has been stressful", "embedding": [...], "timestamp": "2026-02-10T10:00:00Z" }
-  ],
-  "top_k": 5,
-  "threshold": 0.75
-}
-```
+✅ **Two Separate Chatbots** — Completely distinct implementations with different personalities  
+✅ **Response Filtering** — Auto-detects directive phrases and regenerates responses  
+✅ **Crisis Detection** — Identifies self-harm indicators and provides resources (Reflect bot)  
+✅ **Multi-Language Support** — Auto-detects user language and responds accordingly  
+✅ **Conversation Memory** — Each bot maintains context across exchanges  
+✅ **Pure Non-Directive** — Both bots use only questions, never give advice or answers
 
-### `POST /summary` — Session Summary
-```json
-{
-  "chatbot": "reflect",
-  "messages": [
-    { "role": "user", "content": "I feel lost" },
-    { "role": "assistant", "content": "What does that feeling of being lost look like for you?" }
-  ]
-}
-```
+### Response Filtering
 
-### `POST /embed` — Generate Embedding
-```json
-{ "text": "I feel peaceful today" }
-```
+Both chatbots actively filter their responses to ensure they maintain their non-directive approach:
 
-### `GET /health` — Health Check
+**Reflect bot blocks:**
+- "you should", "try doing", "I recommend"
+- "you need to", "have you considered"
+- "it might help to", "why don't you"
+- Any directive or advisory language
 
-## Backend Integration Guide
+**Inner Learning bot blocks:**
+- All directive phrases above, plus:
+- "the answer is", "let me explain"
+- "here's how it works", "actually"
+- Any teaching or instructional language
 
-This system is **stateless** — it does NOT store data. Your backend handles all persistence:
+If blocked phrases are detected, the bot automatically regenerates its response (up to 2 retries).
 
-### What to store per message:
-```
-- user_id, chatbot_type, role, content, timestamp
-- embedding (from response.embedding / response.reply_embedding)
-- detected_language
-```
+### Crisis Detection (Reflect Bot)
 
-### What to store per session:
-```
-- session_id, user_id, chatbot_type
-- summary (from /summary endpoint or response.summary)
-```
+The Reflect bot monitors for self-harm indicators:
+- "want to die", "end my life", "kill myself"
+- "suicidal", "no reason to live"
+- "self-harm", "better off dead"
 
-### What to store for safety:
-```
-- crisis events (when response.crisis_detected == true)
-- filter logs (when response.response_was_filtered == true)
-```
+When detected:
+1. Returns compassionate, non-directive response
+2. Provides crisis helpline resources in user's language
+3. Logs event details (crisis_detected=True in response)
 
-### Recommended flow:
-1. User sends message → backend calls `POST /chat`
-2. Store user message + embedding, store bot reply + reply_embedding
-3. On session end → call `POST /summary`, store it
-4. Next session → include stored summaries in `past_summaries`
-5. Optionally call `/semantic-search` first to find relevant past context
-
-## Features
-- **Response Filter** — Auto-detects directive phrases ("you should", "try doing", etc.) and regenerates
-- **Crisis Detection** — Detects self-harm indicators, returns crisis resources, logs for safety review
-- **Multi-Language** — Detects language (English, Arabic, etc.), responds in same language
-- **Semantic Memory** — Embedding-based retrieval of relevant past conversations
-- **Neutral Summaries** — No progress tracking, just themes explored
+---
 
 ## Project Structure
+
 ```
-config.py              — Settings, system prompts, crisis resources
-chatbot_reflect.py     — Reflect chatbot class (emotional exploration)
-chatbot_learning.py    — Inner Learning chatbot class (Socratic method)
-filters.py             — Response filter & crisis detection
-memory.py              — Embeddings & semantic search (for future use)
-models.py              — Pydantic models (for API integration later)
-test_bots.py           — Terminal interface for testing both bots
-main.py                — FastAPI application (coming soon)
+chatbot_reflect.py     — Reflect chatbot (emotional exploration)
+chatbot_learning.py    — Inner Learning chatbot (Socratic method)
+config.py              — System prompts, settings, crisis resources
+filters.py             — Response filtering & crisis detection
+memory.py              — Embedding utilities (for future features)
+test_bots.py           — Interactive terminal testing interface
+demo.py                — Automated demo of both chatbots
 ```
 
-## Next Steps
+---
 
-- [x] Two separate chatbot implementations
-- [x] Terminal testing interface
-- [x] Response filtering and crisis detection
-- [ ] FastAPI integration (for production use)
-- [ ] Semantic memory with embeddings
-- [ ] Session summaries and continuity
-- [ ] Database integration guide
+## Examples
+
+### Reflect Bot Example
+```
+💬 You: I've been feeling really overwhelmed lately
+
+💭 Reflect: I hear that feeling of being overwhelmed is present for you 
+            right now. What does that overwhelm feel like in your body?
+
+💬 You: It feels heavy in my chest
+
+💭 Reflect: There's a heaviness you're noticing in your chest. What's that 
+            heaviness trying to tell you, if it could speak?
+```
+
+### Inner Learning Bot Example
+```
+💬 You: How does photosynthesis work?
+
+🧠 Inner Learning: That's a fascinating process to explore! When you think 
+                   about plants and sunlight, what do you already know or 
+                   sense is happening?
+
+💬 You: Plants use sunlight to make food somehow?
+
+🧠 Inner Learning: You're already touching on something key there — plants 
+                   and sunlight and making food. What do you think the 
+                   sunlight is actually doing in that process?
+```
+
+---
+
+## Philosophy
+
+**MindGlow** is built on one core principle:
+
+> **No advice. No solutions. No judgments. Just space to think.**
+
+Both chatbots help you discover your own insights by:
+- Asking open-ended questions
+- Reflecting back what you share
+- Holding space without rushing
+- Never telling you what to do or think
+- Letting silence and pauses be okay
+
+The **Reflect** bot explores emotions. The **Inner Learning** bot explores ideas. Both guide you to your own understanding.
+
+---
+
+## Requirements
+
+- Python 3.9+
+- OpenAI API key
+- Dependencies: `openai`, `python-dotenv`, `numpy`, `langdetect`
+
+---
+
+## License
+
+This project is for educational and personal use. Use responsibly and ethically.
