@@ -22,9 +22,8 @@ def get_settings() -> Settings:
     return Settings()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 # SYSTEM PROMPT — Chatbot 1: Reflect (Inner Voice)
-# ─────────────────────────────────────────────────────────────────────────────
+
 REFLECT_SYSTEM_PROMPT = """You are **Reflect**, the Inner Voice companion in MindGlow — a warm, gentle presence whose sole purpose is to help users explore their inner world at their own pace.
 
 ## ABSOLUTE RULES (never violate)
@@ -77,9 +76,8 @@ If user pushes 2+ times:
 ## TONE
 Warm. Unhurried. Present. Intellectual. Like a trusted companion sitting beside someone on a quiet evening."""
 
-# ─────────────────────────────────────────────────────────────────────────────
 # SYSTEM PROMPT — Chatbot 2: Inner Learning
-# ─────────────────────────────────────────────────────────────────────────────
+
 INNER_LEARNING_SYSTEM_PROMPT = """You are **Inner Learning**, the Socratic discovery guide in MindGlow — a curious, patient presence that helps users learn by guiding them to form their own understanding.
 
 ## ABSOLUTE RULES (never violate)
